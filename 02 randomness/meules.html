@@ -102,13 +102,6 @@
         parent.appendChild(dom[id]);
     };
 
-    //drehung
-    lineRotation = function ({ center, radius, rotation }) {
-        return [
-            { x: center.x + Math.sin(rotation) * radius, y: center.y + Math.cos(rotation) * radius },
-            { x: center.x - Math.sin(rotation) * radius, y: center.y - Math.cos(rotation) * radius }
-        ];
-    };
 
     //DOM
 
@@ -124,55 +117,50 @@
     svg.makeLayer({ parent: dom.stage, id: "svgLayer", x: 0, y: 0 });
 
 
-    twrk.getDistance = function (a, b) {
+    //GEOMETRY
+    let geo = {};
+
+    geo.line = function ({ center, radius, rotation }) {
+        return [
+            { x: center.x + Math.sin(rotation) * radius, y: center.y + Math.cos(rotation) * radius },
+            { x: center.x - Math.sin(rotation) * radius, y: center.y - Math.cos(rotation) * radius }
+        ];
+    };
+
+    geo.getDistance = function (a, b) {
         let aa = a.x - b.x;
         let bb = a.y - b.y;
         return Math.sqrt(aa * aa + bb * bb);
     };
 
-    //drawing
-    for (let i = 0; i < 2000; i++) {
-
-        let temp = { x: (-1 + Math.random() * 2) * 50, y: (-1 + Math.random() * 2) * 50 };
-
-        let line = lineRotation({
-            center: temp,
-            rotation: Math.random() * Math.PI,
-            radius: 2
-        });
-
-        if (twrk.getDistance(temp, { x: 0, y: 0 }) > 40) {
-
-            let path = svg.path(line);
-
-            svg.makeLine({
-                id: "line_" + i, parent: dom.svgLayer, cap: "round", stroke: 0.2, color: "#fff", d: path
-            });
-        }
-
-    }
 
     //drawing
     for (let i = 0; i < 2000; i++) {
 
-        let temp = { x: (-1 + Math.random() * 2) * 50, y: (-1 + Math.random() * 2) * 50 };
+        let randomCoordiante = { x: (-1 + Math.random() * 2) * 50, y: (-1 + Math.random() * 2) * 50 };
 
-        let line = lineRotation({
-            center: temp,
+        let line = geo.line({
+            center: randomCoordiante,
             rotation: Math.random() * Math.PI,
             radius: 2
         });
 
         let path = svg.path(line);
 
-        svg.makeLine({
-            id: "line2_" + i, parent: dom.svgLayer, cap: "round", stroke: 0.5, color: "#0ff", d: path
-        });
+        if (geo.getDistance(randomCoordiante, { x: 0, y: 0 }) > 40) {
 
+            svg.makeLine({
+                id: "line2_" + i, parent: dom.svgLayer, cap: "round", stroke: 0.2, color: "#00f", d: path
+            });
 
+        } else {
 
+            svg.makeLine({
+                id: "line_" + i, parent: dom.svgLayer, cap: "round", stroke: 0.2, color: "#fff", d: path
+            });
+
+        }
     }
-
 
 </script>
 
