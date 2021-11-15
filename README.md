@@ -5,7 +5,7 @@ Coding for the Arts
 ## Inhalt
 00 SVG Engine  
 01 Randomness 1  
-02 Randomness 2
+02 Randomness 2  
 03 Time  
   
 ### Lizens
