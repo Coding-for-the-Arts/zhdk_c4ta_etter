@@ -3,7 +3,7 @@
 
 <head>
 
-    <title>mesh</title>
+    <title>meules</title>
 
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -128,9 +128,9 @@
     for (let i = 0; i < 100; i++) {
 
         let line = lineRotation({
-            center: { x: (-1 + Math.random() * 2) * 50, y: (-1 + Math.random() * 2) * 50 },
+            center: { x: (-1 + Math.random()*2) * 50, y: (-1 + Math.random() * 2) * 50 },
             rotation: Math.random() * Math.PI,
-            radius: 2
+            radius: 10
         });
 
         let path = svg.path(line);
