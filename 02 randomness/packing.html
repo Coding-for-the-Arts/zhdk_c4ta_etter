@@ -1,0 +1,224 @@
+<!doctype html>
+<html>
+
+<head>
+
+	<title>packing</title>
+
+	<meta charset='utf-8' />
+	<meta name="viewport" content="initial-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+
+</head>
+
+
+<body style="margin: 0; padding: 0; width: 100%; height: 100vh; font-size: 0px; background-color: #000;">
+
+	<script language="javascript" type="text/javascript">
+
+		function randomColor() {
+			return "#" + Math.floor(Math.random() * 16777215).toString(16);
+		};
+
+		function randomEntry(ia) {
+			return ia[Math.floor(Math.random() * ia.length)];
+		}
+
+
+		function getDistance(a, b) {
+			var aa = a.x - b.x;
+			var bb = a.y - b.y;
+			return Math.round(Math.sqrt(aa * aa + bb * bb) * 100) / 100;
+		}
+
+
+		function lineCollision(a, b, c, d, padding) { //line1 = a–b line2 = c–d
+
+			if (!padding) {
+				padding = 0;
+			}
+
+			let det, gamma, lambda;
+
+			det = (b.x - a.x) * (d.y - c.y) - (d.x - c.x) * (b.y - a.y);
+			if (det === 0) {
+				return false;
+			} else {
+				lambda = ((d.y - c.y) * (d.x - a.x) + (c.x - d.x) * (d.y - a.y)) / det;
+				gamma = ((a.y - b.y) * (d.x - a.x) + (b.x - a.x) * (d.y - a.y)) / det;
+				return (0 < lambda + padding && lambda - padding < 1) && (0 < gamma + padding && gamma - padding < 1);
+			}
+		};
+
+		function circleCollision(click, position, radius, padding) {
+			if (padding) {
+				if (getDistance(click, position) < radius + padding) {
+					return true;
+				}
+			} else {
+				if (getDistance(click, position) < radius) {
+					return true;
+				}
+			}
+		};
+
+		function circleOverlap(circle1, circle2, padding) { //{x, y, r}
+			if (!padding) {
+				padding = 0;
+			}
+			if (getDistance(circle1, circle2) < circle1.radius + circle2.radius + padding) {
+				return true;
+			}
+		};
+
+		function rectCollision(click, rect) { //rect = [x, y, width, height]
+			if (click.x > rect.x && click.x < rect.x + rect.width && click.y > rect.y && click.y < rect.y + rect.height) {
+				return true;
+			} else {
+				return false;
+			}
+		};
+
+		function collision(rect1, rect2) {
+			if (
+				rect1.x < rect2.x + rect2.width &&
+				rect1.x + rect1.width > rect2.x &&
+				rect1.y < rect2.y + rect2.height &&
+				rect1.y + rect1.height > rect2.y
+			) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
+		function RectInsideRect(rect, stage) {
+			if (
+				rect.x >= stage.x &&
+				rect.y >= stage.y &&
+				rect.x + rect.width <= stage.x + stage.width &&
+				rect.y + rect.height <= stage.y + stage.height
+			) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		function circleInsideRect(circle, rect) {
+			if (
+				circle.x - circle.radius > rect.x &&
+				circle.x + circle.radius < rect.x + rect.width &&
+				circle.y - circle.radius > rect.y &&
+				circle.y + circle.radius < rect.y + rect.height
+			) {
+				return true;
+			}
+		}
+
+
+		function insideCircle(rect, circle) {
+			if (
+				getDistance({ x: rect.x, y: rect.y }, circle) < circle.radius &&
+				getDistance({ x: rect.x + rect.width, y: rect.y }, circle) < circle.radius &&
+				getDistance({ x: rect.x + rect.width + rect.width, y: rect.y + rect.height }, circle) < circle.radius &&
+				getDistance({ x: rect.x, y: rect.y + rect.height }, circle) < circle.radius
+			) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
+		function makeRect(io) {
+
+			let div = document.createElement("div");
+			div.style.left = io.x * io.scale + "px";
+			div.style.top = io.y * io.scale + "px";
+			div.style.width = io.width * io.scale + "px";
+			div.style.height = io.height * io.scale + "px";
+			div.style.transform = "rotate(" + io.r + "deg)";
+			div.style.marginLeft = -io.width * io.scale / 2 + "px";
+			div.style.marginTop = -io.height * io.scale / 2 + "px";
+			div.style.background = io.color;
+			div.style.opacity = io.a;
+			div.style.borderRadius = io.borderRadius * io.scale + "px";
+			div.style.position = "fixed";
+
+			document.body.appendChild(div);
+		}
+
+		function makeCircle(io) {
+
+			let div = document.createElement("div");
+			div.style.left = io.x * io.scale + "px";
+			div.style.top = io.y * io.scale + "px";
+			div.style.width = io.radius * 2 * io.scale + "px";
+			div.style.height = io.radius * 2 * io.scale + "px";
+			div.style.marginLeft = -io.radius * io.scale + "px";
+			div.style.marginTop = -io.radius * io.scale + "px";
+			div.style.background = io.color;
+			div.style.opacity = io.a;
+			div.style.borderRadius = "50%";
+			div.style.position = "fixed";
+
+			document.body.appendChild(div);
+		}
+
+
+		function build(stage) {
+
+			let rules = {
+				sizes: [4, 8, 16],
+				maxTries: 1000000,
+				maxItems: 1500,
+				circle: false,
+				colors: ["#fff"]
+			};
+
+
+			let placed = [];
+			let tries = 0;
+
+			while (placed.length < rules.maxItems && tries < rules.maxTries) {
+
+				tries++;
+
+				let potentialCircle = {
+					scale: stage.scale,
+					x: stage.x + Math.floor(Math.random() * stage.width),
+					y: stage.y + Math.floor(Math.random() * stage.height),
+					radius: randomEntry(rules.sizes) / 2,
+					color: randomEntry(rules.colors)
+				}
+
+				if (!circleInsideRect(potentialCircle, stage)) continue;
+
+				let collision = false;
+				for (let p = 0; p < placed.length; p++) {
+					if (circleOverlap(potentialCircle, placed[p], 1.5)) {
+						collision = true;
+						break;
+					};
+				}
+				if (collision == false) {
+					makeCircle(potentialCircle);
+					placed.push(potentialCircle);
+				}
+
+			}
+
+			console.log("tries: " + tries + ", placed: " + placed.length);
+
+		}
+
+		build({ x: 10, y: 10, width: 150, height: 150, scale: 4 });
+
+
+	</script>
+
+</body>
+
+</html>

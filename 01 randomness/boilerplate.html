@@ -43,7 +43,7 @@
 
     //COORDINATES
 
-    twrk.scale = function ({ width, height }) {
+    twrk.scale = function ({ height, width }) {
         if (width) {
             twrk.width = width;
             twrk.res = window.innerWidth / twrk.width;
@@ -55,7 +55,7 @@
         }
         twrk.center = { x: twrk.width / 2, y: twrk.height / 2 };
     }
-    twrk.scale({ height: 120 });
+    twrk.scale({ width: 120 });
 
 
     //SVG
@@ -94,14 +94,50 @@
         parent.appendChild(dom[id]);
     };
 
-    svg.makeShape = function ({ parent, id, d = "", color = "#ff00ff" }) {
+    svg.makeShape = function ({ parent, id, d = "", stroke, color = "#ff00ff" }) {
         dom[id] = document.createElementNS(svg.nameSpace, "path");
         dom[id].setAttributeNS(null, "fill", color);
+        dom[id].setAttributeNS(null, "stroke", color);
+        dom[id].setAttributeNS(null, "stroke-width", stroke * twrk.res);
         dom[id].setAttributeNS(null, "d", d);
         dom[id].id = id;
         parent.appendChild(dom[id]);
     };
 
+    let css = {};
+    css.makeBox = function ({ parent, id, x = 0, y = 0, rotation = 0 }) {
+        dom[id] = document.createElement("div");
+        dom[id].style.height = "400px";
+        dom[id].style.width = "400px";
+        dom[id].style.transform = "translate(" + x * twrk.res + "px, " + y * twrk.res + "px) rotate(" + rotation + "deg)"; //rotate(0deg)
+        dom[id].style.backgroundColor = "#f00";
+        dom[id].id = id;
+        parent.appendChild(dom[id]);
+    };
+
+    css.makeCircle = function ({ parent, id, x = 0, y = 0, r = 10, color = "#ff0" }) {
+        dom[id] = document.createElement("div");
+        dom[id].style.height = "10px";
+        dom[id].style.width = "10px";
+        dom[id].style.transform = "translate(" + (x * twrk.res) + "px, " + (y * twrk.res) + "px)"; //rotate(0deg)
+        dom[id].style.backgroundColor = color;
+        dom[id].id = id;
+        dom[id].style.borderRadius = "50%";
+        parent.appendChild(dom[id]);
+    };
+
+    svg.box = function ({ corner = 4, size = 10, rotation = 0, point = { x: 0, y: 0 } }) {
+        let output = [];
+        for (let i = 0; i < corner; i++) {
+            let sizeRandom = size * Math.random();
+
+            let radian = Math.PI * 2 / corner * i + rotation;
+            output.push({
+                x: point.x + Math.cos(radian) * sizeRandom, y: point.y + Math.sin(radian) * sizeRandom
+            });
+        }
+        return output;
+    };
 
     //DOM
 
@@ -116,10 +152,46 @@
     //svg layer
     svg.makeLayer({ parent: dom.stage, id: "svgLayer", x: 0, y: 0 });
 
-    //drawing
-    svg.makeShape({ parent: dom.svgLayer, id: "form", stroke: 1, color: "#f00", d: svg.path([{ x: -30, y: -50 }, { x: 50, y: 30 }, { x: -50, y: 30 }]) })
-    svg.makeLine({ parent: dom.svgLayer, id: "linie", stroke: 1, color: "#f0f", d: svg.path([{ x: -50, y: -50 }, { x: 50, y: 30 }]) })
-    svg.makeLine({ parent: dom.svgLayer, id: "punkt", cap: "round", stroke: 10, color: "#ff0", d: svg.path([{ x: -30, y: -30 }]) })
+    twrk.getDistance = function (a, b) {
+        let aa = a.x - b.x;
+        let bb = a.y - b.y;
+        return Math.sqrt(aa * aa + bb * bb);
+    };
+
+    twrk.collision = function (a, b) {
+        if (twrk.getDistance(a, b) < a.r + b.r) {
+            return true;
+        }
+    };
+
+    let placed = [];
+    let tries = 0;
+
+    while (tries < 200) {
+
+        let temp = { id: "circle" + tries, x: -50+Math.random() * 100, y: -50+Math.random() , r: 10 };
+        console.log(temp);
+        css.makeCircle({ parent: dom.stage, id: temp.id, color: "#ff0", r: temp.r, x: temp.x, y: temp.y })
+        /*
+        let collision = false;
+
+        for (let i = 0; i < placed.length; i++) {
+            if (twrk.collision(temp, placed[i])) {
+                collision = true;
+                console.log("collide" + i);
+            }
+        }
+
+        if (collision == false) {
+            placed.push(temp);
+            css.makeCircle({ parent: dom.stage, id: temp.id, r: temp.r, color: "#ff0", x: temp.x, y: temp.y })
+        }
+        */
+        tries++;
+
+    }
+
+    console.log(placed);
 
 
 </script>
