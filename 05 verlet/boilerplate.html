@@ -112,29 +112,48 @@
 
 
     //PHYSICS
-
     let physics = {};
 
-    physics.makePoint = function ({ position = { x: 0, y: 0 }, drag = 0.9, acceleration = { x: 0, y: 0 }, id, parent }) {
-        parent[id] = {};
-        parent[id].id = id;
-        parent[id].position = position;
-        parent[id].drag = drag;
-        parent[id].acceleration = acceleration;
+    physics.makePoint = function ({ id, position, parent, drag = 0.92 }) {
+        parent[id] = {
+            id: id,
+            position: position,
+            acceleration: { x: 0, y: 0 },
+            drag: drag
+        };
     };
 
     physics.calculate = function ({ point, force = { x: 0, y: 0 } }) {
+
         point.acceleration = { x: point.acceleration.x * point.drag, y: point.acceleration.y * point.drag };
         point.acceleration = { x: point.acceleration.x + force.x, y: point.acceleration.y + force.y };
         point.position = { x: point.position.x + point.acceleration.x, y: point.position.y + point.acceleration.y };
+
     };
 
+    physics.verlet = function ({ a, b, distance = 100, stiffness = 0.01 }) {
+
+        let difference = { x: a.position.x - b.position.x, y: a.position.y - b.position.y };
+        let dot = (difference.x * difference.x) + (difference.y * difference.y);
+
+        if (dot == 0) dot = 0.001; // 0 creates NaN
+
+        let scalar = (distance - dot) / dot * stiffness * 0.5;
+        let move = { x: difference.x * scalar, y: difference.y * scalar };
+
+        a.position = { x: a.position.x + move.x, y: a.position.y + move.y };
+        b.position = { x: b.position.x - move.x, y: b.position.y - move.y };
+
+    };
 
     let dots = {};
 
-    for(let i = 0; i < 30; i++){
-        physics.makePoint({ id: "dot" + i, position: { x: -100+Math.random()*50, y: Math.random()*50 }, parent: dots });
-    }
+    physics.makePoint({ id: "a", position: { x: -20, y: -12 }, parent: dots });
+    physics.makePoint({ id: "b", position: { x: 20, y: -40 }, parent: dots });
+    physics.makePoint({ id: "c", position: { x: -50, y: -40 }, parent: dots });
+
+
+
 
 
     //DOM
@@ -150,32 +169,36 @@
     //svg layer
     svg.makeLayer({ parent: dom.stage, id: "svgLayer", x: 0, y: 0 });
 
-    for (let id in dots) {
-        svg.makeLine({ parent: dom.svgLayer, id: id, stroke: 4, color: "#ff0", cap: "round" });
-    }
+    //dots
+    svg.makeLine({ parent: dom.svgLayer, id: "dots", cap: "round", stroke: 3, color: "#fff", d: "" });
 
+    function loop() {
 
-    //LOOP
+        let collect = [];
 
-    function loop(time) {
+        physics.verlet({ a: dots.a, b: dots.b });
+        physics.verlet({ a: dots.b, b: dots.c });
+        physics.verlet({ a: dots.c, b: dots.a });
 
         for (let id in dots) {
 
             let dot = dots[id];
-            physics.calculate({ point: dot, force: { x: 0.001, y: 0.02 } });
+
+            physics.calculate({ point: dot, force: { x: 0.01, y: 0.02 } });
 
             if (dot.position.y > 0) {
-                dot.acceleration.y = -5;
+                dot.acceleration.y = -2;
             }
-
-            dom[id].setAttributeNS(null, "d", svg.path([dot.position]));
-
+            collect.push([dot.position]);
         }
+        dom.dots.setAttributeNS(null, "d", svg.paths(collect));
 
         requestAnimationFrame(loop);
+
     };
 
     loop();
+
 
 
 

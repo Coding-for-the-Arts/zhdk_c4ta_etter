@@ -3,7 +3,7 @@
 
 <head>
 
-    <title>physics!</title>
+    <title>verlet</title>
 
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
@@ -71,7 +71,8 @@
         for (var i = 0; i < ia.length; i++) {
             output += ia[i].x * twrk.res + " " + ia[i].y * twrk.res + " ";
         }
-        output += "z";
+        if(ia.length == 1) output += "z";
+        
         return output;
     };
 
@@ -90,7 +91,7 @@
         parent.appendChild(dom[id]);
     };
 
-    svg.makeLine = function ({ parent, id, d = "", color = "#ff00ff", stroke = 1, cap = "butt", join = "round" }) {
+    svg.makeLine = function ({ parent, id, d = "", color = "#ff00ff", stroke = 0.5, cap = "butt", join = "bevel" }) {
         dom[id] = document.createElementNS(svg.nameSpace, "path");
         dom[id].setAttributeNS(null, "fill", "none");
         dom[id].setAttributeNS(null, "d", d);
@@ -115,12 +116,13 @@
 
     let physics = {};
 
-    physics.makePoint = function ({ position = { x: 0, y: 0 }, drag = 0.9, acceleration = { x: 0, y: 0 }, id, parent }) {
-        parent[id] = {};
-        parent[id].id = id;
-        parent[id].position = position;
-        parent[id].drag = drag;
-        parent[id].acceleration = acceleration;
+    physics.makePoint = function ({ position = { x: 0, y: 0 }, drag = 0.97, acceleration = { x: 0, y: 0 }, id }) {
+        output = {};
+        output.id = id;
+        output.position = position;
+        output.drag = drag;
+        output.acceleration = acceleration;
+        return output;
     };
 
     physics.calculate = function ({ point, force = { x: 0, y: 0 } }) {
@@ -129,11 +131,27 @@
         point.position = { x: point.position.x + point.acceleration.x, y: point.position.y + point.acceleration.y };
     };
 
+    physics.verlet = function ({ a, b, distance, stiffness }) {
 
-    let dots = {};
+        let difference = { x: a.position.x - b.position.x, y: a.position.y - b.position.y };
+        let dot = (difference.x * difference.x) + (difference.y * difference.y);
 
-    for(let i = 0; i < 30; i++){
-        physics.makePoint({ id: "dot" + i, position: { x: -100+Math.random()*50, y: Math.random()*50 }, parent: dots });
+        if (dot == 0) dot = 0.001;
+
+        let scalar = (distance - dot) / dot * stiffness * 0.5;
+        let move = { x: difference.x * scalar, y: difference.y * scalar };
+
+        a.position = { x: a.position.x + move.x, y: a.position.y + move.y };
+        b.position = { x: b.position.x - move.x, y: b.position.y - move.y };
+    };
+
+    //make physics dots
+    let dots = [];
+    for (let i = 0; i < 32; i++) {
+        dots.push(physics.makePoint({ 
+            id: "dot" + i, 
+            position: { x: -50 + Math.random() * 50, y: Math.random() * 100 }
+        }));
     }
 
 
@@ -149,33 +167,40 @@
 
     //svg layer
     svg.makeLayer({ parent: dom.stage, id: "svgLayer", x: 0, y: 0 });
-
-    for (let id in dots) {
-        svg.makeLine({ parent: dom.svgLayer, id: id, stroke: 4, color: "#ff0", cap: "round" });
-    }
+    svg.makeLine({ parent: dom.svgLayer, id: "rope", join: "bevel", cap: "round", stroke: 0.5, color: "#fff" });
+    svg.makeLine({ parent: dom.svgLayer, id: "circles", stroke: 4, color: "#ff0", cap: "round" });
 
 
     //LOOP
 
     function loop(time) {
 
-        for (let id in dots) {
+        //circles
+        let speed = 500;
+        let size = 8;
+        let circleLeft = { position: { x: Math.sin(time / speed) * size - 30, y: Math.cos(time / speed) * size*4 } };
+        let circleRight = { position: { x: Math.cos(time / speed) * size + 30, y: Math.sin(time / speed) * size*4 } };
+        dom.circles.setAttributeNS(null, "d", svg.paths([[circleLeft.position], [circleRight.position]]));
 
-            let dot = dots[id];
-            physics.calculate({ point: dot, force: { x: 0.001, y: 0.02 } });
-
-            if (dot.position.y > 0) {
-                dot.acceleration.y = -5;
-            }
-
-            dom[id].setAttributeNS(null, "d", svg.path([dot.position]));
-
+        //verlet
+        physics.verlet({ a: circleLeft, b: dots[0], distance: 0, stiffness: 1 });
+        for (let i = 0; i < dots.length-1; i++) {
+            physics.verlet({ a: dots[i], b: dots[(i+1)], distance: 1, stiffness: 0.8 });
         }
+        physics.verlet({ a: dots[dots.length-1], b: circleRight, distance: 0, stiffness: 1 });
+
+        let collect = [];
+        for (let i = 0; i < dots.length; i++) {
+            let dot = dots[i];
+            physics.calculate({ point: dot, force: { x: 0, y: 0 } });
+            collect.push(dot.position)
+        }
+        dom.rope.setAttributeNS(null, "d", svg.path(collect));
 
         requestAnimationFrame(loop);
     };
 
-    loop();
+    loop(0);
 
 
 
