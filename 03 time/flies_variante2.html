@@ -155,9 +155,6 @@
 
     //FLY
     flies = 10;
-    for (let i = 0; i < flies; i++) {
-       // svg.makeLine({ parent: dom.svgLayer, d: "", id: "dot" + i, color: "#ff0", stroke: 10, cap: "round", x: 0, y: 0 });
-    }
     svg.makeLine({ parent: dom.svgLayer, d: "", id: "dot", color: "#ff0", stroke: 10, cap: "round", x: 0, y: 0 });
 
 
@@ -178,7 +175,7 @@
             path.push({ x: x, y: y });
         }
 
-        dom["dot" + i].setAttributeNS(null, "d", svg.dots(path));
+        dom.dot.setAttributeNS(null, "d", svg.dots(path));
 
         requestAnimationFrame(loop);
 
