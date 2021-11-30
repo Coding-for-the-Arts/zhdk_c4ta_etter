@@ -6,4 +6,4 @@ Fischli & Weiss: https://www.youtube.com/watch?v=SXrTlo1ytE0
 Tinguely: https://www.youtube.com/watch?v=WaSGVAO-Ki8  
 Arthur Ganson (Bonus): https://www.youtube.com/watch?v=bPfn01Ndc1g  
   
-Aufgabe: Programmiere deine eigene Maschine.  
+Aufgabe: Programmiere deine eigene Maschine. Mit Maschine mein ich, mindestens zwei Dinge die einander beeinflussen. 
