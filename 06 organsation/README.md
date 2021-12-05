@@ -1,9 +1,6 @@
-# 04 Physics
+# 06 Organisation
     
-Video: https://www.youtube.com/watch?v=4RT1jx51ydY  
+Video: https://youtu.be/iDB23v8IB2w   
   
-Fischli & Weiss: https://www.youtube.com/watch?v=SXrTlo1ytE0  
-Tinguely: https://www.youtube.com/watch?v=WaSGVAO-Ki8  
-Arthur Ganson (Bonus): https://www.youtube.com/watch?v=bPfn01Ndc1g  
-  
-Aufgabe: Programmiere deine eigene Maschine.  
+SVG weiche Kurven erklärt (Joshua Bragg): https://medium.com/@bragg/cubic-bezier-curves-with-svg-paths-a326bb09616f  
+SVG Beziér (Mozilla): https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths  
