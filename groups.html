@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+
+<head>
+
+	<title>random groups</title>
+
+	<meta charset='utf-8' />
+	<meta name="viewport" content="initial-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+
+</head>
+
+
+<body
+	style="margin: 0; padding: 0; width: 100%; height: 100vh; font-size: 50px; font-family: 'sans'; background-color: #000; color: #fff">
+
+	<script language="javascript" type="text/javascript">
+
+		klasse = [
+			{ name: "Marine", present: true },
+			{ name: "Sibille", present: false },
+			{ name: "Michael", present: true },
+			{ name: "Kim", present: true },
+			{ name: "Nicolas", present: true },
+			{ name: "Janine", present: true },
+			{ name: "Nadine", present: true },
+			{ name: "Boris", present: true },
+			{ name: "Samuel", present: true },
+			{ name: "Christoph", present: true },
+			{ name: "Eva", present: true },
+			{ name: "Eric", present: true },
+			{ name: "Evelyn", present: true },
+			{ name: "Merlin", present: true }
+		];
+
+		let present = [];
+
+		for (let i = 0; i < klasse.length; i++) {
+			if (klasse[i].present) {
+				present.push(klasse[i]);
+			}
+		}
+
+		let size = 2;
+		let groups = Math.floor(present.length / size);
+
+		let randomGroups = [];
+
+		for (let i = 0; i < groups; i++) {
+
+			let group = [];
+
+			for (let k = 0; k < size; k++) {
+				group.push(present.splice(Math.floor(Math.random() * present.length), 1));
+			}
+
+			randomGroups.push(group);
+		}
+		
+		if(present.length > 0){
+			console.log(present);
+			for(let i = 0; i < present.length; i++){
+				randomGroups[0].push([present[i]])
+			}
+		}
+
+		let output = "";
+		for (let k = 0; k < randomGroups.length; k++) {
+			for (let i = 0; i < randomGroups[k].length; i++) {
+				output += randomGroups[k][i][0].name + " ";
+			}
+			output += "<br>"
+		}
+
+		document.body.innerHTML = output;
+
+
+	</script>
+
+</body>
+
+</html>
