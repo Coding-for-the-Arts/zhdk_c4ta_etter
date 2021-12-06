@@ -7,3 +7,4 @@ Side quest (OsciStudio): https://www.youtube.com/watch?v=4gibcRfp4zA
   
 Aufgabe: Programmiere einen Sound der mit synchron zu visuellen Bewegungen verändert.  
   
+Frequenzen der  Noten: https://pages.mtu.edu/~suits/notefreqs.html  
