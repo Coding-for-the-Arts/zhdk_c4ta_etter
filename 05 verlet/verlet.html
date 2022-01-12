@@ -134,7 +134,7 @@
     physics.verlet = function ({ a, b, distance, stiffness }) {
 
         let difference = { x: a.position.x - b.position.x, y: a.position.y - b.position.y };
-        let dot = (difference.x * difference.x) + (difference.y * difference.y);
+        let dot = Math.sqrt((difference.x * difference.x) + (difference.y * difference.y));
 
         if (dot == 0) dot = 0.001;
 
